@@ -1,0 +1,19 @@
+[worldserver]
+
+############## Global settings ##############
+
+#
+#    VampireSurvivors.Enabled
+#        Description: Enable or Disable the Vampire Survivors Module.
+#        Default:     1 (on)
+#
+
+VampireSurvivors.Enabled = 1
+
+#
+#    VampireSurvivors.Announce
+#        Description: Announce the Vampire Survivors Module at login.
+#        Default:     1 (on)
+#
+
+VampireSurvivors.Announce = 1

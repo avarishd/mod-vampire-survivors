@@ -1,0 +1,21 @@
+CREATE TABLE IF NOT EXISTS `vampiresurvivors`(
+  `CharacterGUID` int(11) NOT NULL,
+  `Highscore` int(11) NOT NULL DEFAULT '0',
+  `GoldSpent` int(11) NOT NULL DEFAULT '0',
+  `Maps` tinyint(3) NOT NULL DEFAULT '0',
+  `Might` tinyint(3) NOT NULL DEFAULT '0',
+  `Armor` tinyint(3) NOT NULL DEFAULT '0',
+  `Health` tinyint(3) NOT NULL DEFAULT '0',
+  `Recovery` tinyint(3) NOT NULL DEFAULT '0',
+  `Cooldown` tinyint(3) NOT NULL DEFAULT '0',
+  `Area` tinyint(3) NOT NULL DEFAULT '0',
+  `Speed` tinyint(3) NOT NULL DEFAULT '0',
+  `Duration` tinyint(3) NOT NULL DEFAULT '0',
+  `Amount` tinyint(3) NOT NULL DEFAULT '0',
+  `Movespeed` tinyint(3) NOT NULL DEFAULT '0',
+  `Magnet` tinyint(3) NOT NULL DEFAULT '0',
+  `Luck` tinyint(3) NOT NULL DEFAULT '0',
+  `Growth` tinyint(3) NOT NULL DEFAULT '0',
+  `Greed` tinyint(3) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`CharacterGUID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
