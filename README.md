@@ -13,7 +13,7 @@ Adds [Vampire Survivors](https://store.steampowered.com/app/1794680/Vampire_Surv
 > [!IMPORTANT]
 > How to uninstall:\
 > Drop acore_world & vampiresurvivors table (acore_characters)\
-> Remove the module folder and rebuild master\
+> Remove the module folder and rebuild master
 
 ## Credits
 Avarishd: [GitHub](https://github.com/avarishd) [Discord](https://discordapp.com/users/125563894310633472)
