@@ -16,6 +16,47 @@
 
 // What the fuck am I doing
 
+enum LevelupUpgrades
+{
+    NPC_VS_UPGRADE_COMMON    = 210005,
+    NPC_VS_UPGRADE_UNCOMMON  = 210006,
+    NPC_VS_UPGRADE_RARE      = 210007,
+    NPC_VS_UPGRADE_EPIC      = 210008,
+    NPC_VS_UPGRADE_LEGENDARY = 210009
+};
+
+enum Misc
+{
+    // Cast on start
+    SPELL_HIT_CHANCE = 43689,
+    // Misc 210000+
+    NPC_SPAWNER      = 210002,
+    NPC_VS_MAGNET    = 210003,
+    NPC_VS_C_LOGIC   = 210004,
+
+    // EXP Creatures 210100+
+    NPC_EXP_BLUE     = 210100,
+
+    // 1-5
+    // Fighting Creatures 211000+
+    NPC_VS_KOBOLD    = 211000,
+    NPC_VS_IMP       = 211001,
+};
+
+enum SpawnerActions
+{
+    ACTION_SUMMON_TEST   = 1,
+    SETDATA_SPAWNER_STUN = 2,
+
+    SPELL_STUN_SUMMONS = 16045,
+};
+
+enum GossipStartGame
+{
+    START_GAME = 100,
+    CHANGE_HERO = 101,
+};
+
 bool VampireSurvivors_Enabled;
 bool VampireSurvivors_AnnounceModule;
 
@@ -62,7 +103,17 @@ public:
     void OnLevelChanged(Player* player, uint8 oldLevel) override
     {
         if (player)
-            player->GetSession()->SendNotification("Level up!");
+        {
+            player->GetSession()->SendNotification("Level up! Select an upgrade!");
+            if (oldLevel <= 25)
+                if (Creature* common = player->SummonCreature(NPC_VS_UPGRADE_COMMON, player->GetPositionX() + 1, player->GetPositionY() + 1, player->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 30000))
+                    common->AddAura(SPELL_STUN_SUMMONS, common);
+
+            if (Creature* spawner = player->FindNearestCreature(NPC_SPAWNER, 30))
+                spawner->AI()->SetData(SETDATA_SPAWNER_STUN, 1);
+
+            player->AddAura(SPELL_STUN_SUMMONS, player);
+        }
     }
 };
 
@@ -492,33 +543,6 @@ public:
     }
 };
 
-enum Creatures
-{   
-    // Misc 210000+
-    NPC_SPAWNER    = 210002,
-    NPC_VS_MAGNET  = 210003,
-    NPC_VS_C_LOGIC = 210004,
-
-    // EXP Creatures 210100+
-    NPC_EXP_BLUE   = 210100,
-
-    // 1-5
-    // Fighting Creatures 211000+
-    NPC_VS_KOBOLD  = 211000,
-    NPC_VS_IMP     = 211001,
-};
-
-enum Actions
-{
-    ACTION_SUMMON_TEST = 1,
-};
-
-enum GossipStartGame
-{
-    START_GAME = 100,
-    CHANGE_HERO = 101,
-};
-
 class npc_vs_game_start : public CreatureScript
 {
 public:
@@ -554,6 +578,7 @@ public:
             case START_GAME:
             {
                 player->RemoveAllAuras();
+                player->AddAura(SPELL_HIT_CHANCE, player); // +20% hit chance
 
                 if (Creature* magnet = player->SummonCreature(NPC_VS_MAGNET, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 960000))
                 {
@@ -564,6 +589,11 @@ public:
                 {
                     clogic->GetMotionMaster()->Clear(false);
                     clogic->GetMotionMaster()->MoveFollow(player, 0, 0, MOTION_SLOT_IDLE);
+                }
+                if (Creature* spawner = player->SummonCreature(NPC_SPAWNER, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 960000))
+                {
+                    spawner->GetMotionMaster()->Clear(false);
+                    spawner->GetMotionMaster()->MoveFollow(player, 0, 0, MOTION_SLOT_IDLE);
                 }
                 CloseGossipMenuFor(player);
                 break;
@@ -642,6 +672,27 @@ public:
                 if (roll_chance_i(50))
                     me->SummonCreature(NPC_EXP_BLUE, summon->GetPositionX(), summon->GetPositionY(), summon->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 180000);
             }
+        }
+
+        // On level
+        void StunSummons(bool s)
+        {
+            summons.DoForAllSummons([&](WorldObject* summon)
+            {
+                if (summon)
+                {
+                    if (s)
+                        summon->ToCreature()->AddAura(SPELL_STUN_SUMMONS, summon->ToCreature());
+                    else
+                        summon->ToCreature()->RemoveAura(SPELL_STUN_SUMMONS);
+                }
+            });
+        }
+
+        void SetData(uint32 type, uint32 id) override
+        {
+            if (type == SETDATA_SPAWNER_STUN)
+                StunSummons(id); // bool 1 stun, 0 remove stun
         }
 
         void DoAction(int32 action) override
@@ -785,6 +836,7 @@ enum Magnet
 
 float const BLUE_EXP = 20.0f;
 
+// All EXP gain is handled via this creature.
 class npc_vs_magnet : public CreatureScript
 {
 public:
@@ -807,7 +859,7 @@ public:
             else
                 me->DespawnOrUnsummon();
 
-            events.ScheduleEvent(EVENT_CHECK_MAGNET_COLLECT, 250ms);
+            events.ScheduleEvent(EVENT_CHECK_MAGNET_COLLECT, 500ms);
         }
 
         Player* GetPlayer() {return ObjectAccessor::GetPlayer(*me, ownerGUID);}
@@ -862,7 +914,7 @@ public:
                                     }
                                 }
                             }
-                            events.ScheduleEvent(EVENT_CHECK_MAGNET_COLLECT, 250ms);
+                            events.ScheduleEvent(EVENT_CHECK_MAGNET_COLLECT, 500ms);
                             break;
                         }
                     }
@@ -887,14 +939,17 @@ enum CentralLogic
 {
     EVENT_CALCULATE_BASIC_UPGRADES = 1,
 
-    // Spells (Hero spells)
-    SPELL_BOULDER                  = 21071, // Crush Flynn
-
     // Heroes
-    FLYNN                          = 10,
-
+    FLYNN                          = 10,  // Crush Flynn
 
     EVENT_FIRE_MAIN_WEAPON         = 100,
+};
+
+enum CrushFlynn
+{
+    // Spells (Hero spells)
+    SPELL_BOULDER                  = 21071,
+    SPELL_BOULDER_VOLLEY           = 38783,
 };
 
 class npc_vs_central_logic : public CreatureScript
@@ -998,7 +1053,7 @@ public:
                                         if (i == 210009) // Amount
                                             global_weapon_amount += basepoints;
 
-                                        if (i == 210011) // Magnet, has to be SetData-ed
+                                        if (i == 210011) // Magnet
                                             if (Creature* magnet = me->FindNearestCreature(NPC_VS_MAGNET, 10))
                                                 magnet->AI()->SetData(SETDATA_MAGNET_ADD_RANGE, basepoints);
 
@@ -1051,6 +1106,53 @@ public:
     }
 };
 
+// Need to stun all summons and reschedule event until an upgrade has been selected. ****
+class npc_vs_levelup_upgrade : public CreatureScript
+{
+public:
+    npc_vs_levelup_upgrade() : CreatureScript("npc_vs_levelup_upgrade") {}
+
+    bool OnGossipHello(Player* player, Creature* creature) override
+    {
+        switch (creature->GetEntry())
+        {
+            case NPC_VS_UPGRADE_COMMON:
+            {
+                AddGossipItemFor(player, GOSSIP_ICON_DOT, "=== Common (30 seconds) ===", GOSSIP_SENDER_MAIN, 0);
+                AddGossipItemFor(player, GOSSIP_ICON_DOT, "Increase Boulder damage by 50%", GOSSIP_SENDER_MAIN, 1);
+                AddGossipItemFor(player, GOSSIP_ICON_DOT, "Increase movement speed by 5%", GOSSIP_SENDER_MAIN, 1);
+                AddGossipItemFor(player, GOSSIP_ICON_DOT, "Increase magnet pickup range by 25%", GOSSIP_SENDER_MAIN, 1);
+            }
+        }
+
+        SendGossipMenuFor(player, GOSSIP_HELLO, creature->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature*  creature, uint32 /*sender*/, uint32 action) override
+    {
+        ClearGossipMenuFor(player);
+
+        switch (action)
+        {
+            case 1:
+            {
+                CloseGossipMenuFor(player);
+                creature->DespawnOrUnsummon();
+
+                if (Creature* spawner = player->FindNearestCreature(NPC_SPAWNER, 30))
+                    spawner->AI()->SetData(SETDATA_SPAWNER_STUN, 0);
+
+                player->RemoveAura(SPELL_STUN_SUMMONS);
+                break;
+            }
+
+        }
+        return true;
+    }
+};
+
+
 void AddVampireSurvivorsScripts()
 {
     new VampireSurvivors_conf();
@@ -1062,4 +1164,5 @@ void AddVampireSurvivorsScripts()
     new npc_vs_exp();
     new npc_vs_magnet();
     new npc_vs_central_logic();
+    new npc_vs_levelup_upgrade();
 }

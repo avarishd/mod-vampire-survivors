@@ -31,7 +31,7 @@ INSERT INTO `creature` (`guid`, `id1`, `id2`, `id3`, `map`, `zoneId`, `areaId`, 
 -- Spawner NPC
 DELETE FROM `creature_template` WHERE (`entry` = @ID+2);
 INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction`, `npcflag`, `speed_walk`, `speed_run`, `speed_swim`, `speed_flight`, `detection_range`, `scale`, `rank`, `dmgschool`, `DamageModifier`, `BaseAttackTime`, `RangeAttackTime`, `BaseVariance`, `RangeVariance`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `HoverHeight`, `HealthModifier`, `ManaModifier`, `ArmorModifier`, `ExperienceModifier`, `RacialLeader`, `movementId`, `RegenHealth`, `mechanic_immune_mask`, `spell_school_immune_mask`, `flags_extra`, `ScriptName`, `VerifiedBuild`) VALUES
-(@ID+2, 0, 0, 0, 0, 0, 'Spawner NPC', '', '', 0, 1, 1, 0, 35, 0, 1, 1.14286, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 130, 'npc_vs_spawner', 0);
+(@ID+2, 0, 0, 0, 0, 0, 'Spawner NPC', '', '', 0, 1, 1, 0, 35, 0, 5, 5, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 130, 'npc_vs_spawner', 0);
 
 DELETE FROM `creature_template_model` WHERE `CreatureID` = @ID+2;
 INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`, `VerifiedBuild`) VALUES
@@ -55,8 +55,24 @@ DELETE FROM `creature_template_model` WHERE `CreatureID` = @ID+4;
 INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`, `VerifiedBuild`) VALUES
 (@ID+4, 0, 169, 1, 1, 0);
 
+-- Levelup Upgrades
+-- Common
+DELETE FROM `creature_template_model` WHERE `CreatureID` BETWEEN @ID+5 AND @ID+9;
+INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`, `VerifiedBuild`) VALUES
+(@ID+5, 0, 28738, 1, 1, 0),
+(@ID+6, 0, 28738, 1, 1, 0),
+(@ID+7, 0, 28738, 1, 1, 0),
+(@ID+8, 0, 28738, 1, 1, 0),
+(@ID+9, 0, 28738, 1, 1, 0);
 
-
+DELETE FROM `creature_template` WHERE `entry` BETWEEN @ID+5 AND @ID+9;
+INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction`, `npcflag`, `speed_walk`, `speed_run`, `speed_swim`, `speed_flight`, `detection_range`, `scale`, `rank`, `dmgschool`, `DamageModifier`, `BaseAttackTime`, `RangeAttackTime`, `BaseVariance`, `RangeVariance`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `HoverHeight`, `HealthModifier`, `ManaModifier`, `ArmorModifier`, `ExperienceModifier`, `RacialLeader`, `movementId`, `RegenHealth`, `mechanic_immune_mask`, `spell_school_immune_mask`, `flags_extra`, `ScriptName`, `VerifiedBuild`) VALUES
+(@ID+5, 0, 0, 0, 0, 0, 'Upgrade', 'Common', '',    0, 80, 80, 0, 35, 3, 1, 1, 1, 1, 1, 1.5, 3, 0, 1, 0, 0, 0, 0, 1, 768, 32768, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 400, 1, 1, 1, 0, 0, 1, 0, 0, 2, 'npc_vs_levelup_upgrade', 0),
+(@ID+6, 0, 0, 0, 0, 0, 'Upgrade', 'Uncommon', '',  0, 80, 80, 0, 35, 3, 1, 1, 1, 1, 1, 1.5, 3, 0, 1, 0, 0, 0, 0, 1, 768, 32768, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 400, 1, 1, 1, 0, 0, 1, 0, 0, 2, 'npc_vs_levelup_upgrade', 0),
+(@ID+7, 0, 0, 0, 0, 0, 'Upgrade', 'Rare', '',      0, 80, 80, 0, 35, 3, 1, 1, 1, 1, 1, 1.5, 3, 0, 1, 0, 0, 0, 0, 1, 768, 32768, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 400, 1, 1, 1, 0, 0, 1, 0, 0, 2, 'npc_vs_levelup_upgrade', 0),
+(@ID+8, 0, 0, 0, 0, 0, 'Upgrade', 'Epic', '',      0, 80, 80, 0, 35, 3, 1, 1, 1, 1, 1, 1.5, 3, 0, 1, 0, 0, 0, 0, 1, 768, 32768, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 400, 1, 1, 1, 0, 0, 1, 0, 0, 2, 'npc_vs_levelup_upgrade', 0),
+(@ID+9, 0, 0, 0, 0, 0, 'Upgrade', 'Legendary', '', 0, 80, 80, 0, 35, 3, 1, 1, 1, 1, 1, 1.5, 3, 0, 1, 0, 0, 0, 0, 1, 768, 32768, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 400, 1, 1, 1, 0, 0, 1, 0, 0, 2, 'npc_vs_levelup_upgrade', 0);
+                                                                                    -- sclae
 
 -- Quest: The Vampire Survivors
 DELETE FROM `quest_template` WHERE (`ID` = @Quests);
